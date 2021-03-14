@@ -1,4 +1,3 @@
-OBJECTS = loader.o
 CC = gcc
 LDFLAGS = -T link.ld -melf_i386
 AS = nasm
@@ -6,8 +5,8 @@ ASFLAGS = -f elf
 
 all: kernel.elf
 
-kernel.elf: $(OBJECTS)
-	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
+kernel.elf: loader.o
+	ld -T link.ld -melf_i386 loader.o -o kernel.elf
 
 os.iso: kernel.elf
 	cp kernel.elf iso/boot/kernel.elf
@@ -16,11 +15,8 @@ os.iso: kernel.elf
 run: os.iso
 	bochs -f bochsrc.txt -q
 
-%.o: %.c
-	$(CC) $< -o $@
-
-%.o: %.s
-	$(AS) $< -o $@
+loader.o: loader.s
+	nasm -f elf32 loader.s 
 
 clean:
 	rm -rf *.o kernel.elf os.iso
