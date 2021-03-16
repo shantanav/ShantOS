@@ -11,11 +11,11 @@ all: kernel.elf
 kernel.elf: $(OBJECTS)
 	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
 
-os.iso: kernel.elf
+ShantOS.iso: kernel.elf
 	cp kernel.elf iso/boot/kernel.elf
-	grub-mkrescue -o os.iso iso
+	grub-mkrescue -o ShantOS.iso iso
 
-run: os.iso
+run: ShantOS.iso
 	bochs -f bochsrc.txt -q
 
 %.o: %.c
@@ -25,4 +25,4 @@ run: os.iso
 	$(AS) $(ASFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o kernel.elf os.iso
+	rm -rf *.o kernel.elf ShantOS.iso
