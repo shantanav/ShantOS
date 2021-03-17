@@ -10,6 +10,7 @@
 
 #define CHAR_SCREEN_WIDTH       80
 #define CHAR_SCREEN_HEIGHT      25
+#define FB_LENGTH               CHAR_SCREEN_WIDTH * CHAR_SCREEN_HEIGHT
 #define TAB_WIDTH               4   // Don't start a war, kids
 
 char *fb = (char *) 0x000B8000;
@@ -44,10 +45,28 @@ void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg) {
     fb[(i * 2) + 1] = ((fg & 0x0F) << 4) | (bg & 0x0F);
 }
 
+void fb_clear() {
+    unsigned int i = 0;
+    while (i < CHAR_SCREEN_HEIGHT * CHAR_SCREEN_WIDTH) {
+        fb_write_cell(i, '\0', 0, 15);
+        i++;
+    }
+    fb_move_cursor(0);
+}
+
 int write(unsigned int i, char *buf, unsigned int len) {
     unsigned int line_offset;
     unsigned int tab_offset;
-    while (i < len && *buf) {
+    while (*buf) {
+        if (i > CHAR_SCREEN_HEIGHT * CHAR_SCREEN_WIDTH) { // Handle scrolling when trying to print beyond framebuffer.
+            unsigned int j = 0;
+            while (j <= CHAR_SCREEN_HEIGHT * CHAR_SCREEN_WIDTH) {
+                fb_write_cell(j, fb[(j + CHAR_SCREEN_WIDTH) * 2], 0, 15);
+                j++;
+            }
+            i -= CHAR_SCREEN_WIDTH * 1;
+            fb_move_cursor(i);
+        }
         if (*buf == '\n') { // Handle newline characters
             line_offset = CHAR_SCREEN_WIDTH - (i % CHAR_SCREEN_WIDTH) - 1;
             len += line_offset;
@@ -56,7 +75,7 @@ int write(unsigned int i, char *buf, unsigned int len) {
             tab_offset = TAB_WIDTH - ((i % CHAR_SCREEN_WIDTH) % TAB_WIDTH);
             i += tab_offset;
             len += tab_offset;
-        } else {
+        } else { // Not a special character? Print normally.
             fb_write_cell(i, *buf, 0, 15);
             fb_move_cursor(i + 1);
         }
@@ -70,5 +89,6 @@ int main(void) {
     unsigned int cursor_pos = 0;
     cursor_pos = write(cursor_pos, "I wrote a pretty convincing text driver for this!\nIt can:\n\t1.\t\tHandle variable tabbing\n\t2.\t\tDo newlines properly\n\t3..\tHandle variable tabbing properly\n", CHAR_SCREEN_WIDTH * CHAR_SCREEN_HEIGHT);
     cursor_pos = write(cursor_pos, "It can even handle being given multiple write statements appropriately, and works akin to C's puts function.", CHAR_SCREEN_WIDTH * CHAR_SCREEN_HEIGHT);
+    cursor_pos = write(CHAR_SCREEN_WIDTH * (CHAR_SCREEN_HEIGHT - 1), "What happens when you intentionally cause a segmentation fault on an operating system with no signal interrupts? Multiple scroll errors it seems. This really stupidly long line is designed to hopefully bugtest that a little bit.", CHAR_SCREEN_WIDTH * CHAR_SCREEN_HEIGHT);
 }
 
