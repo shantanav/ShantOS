@@ -31,8 +31,11 @@
 #define CHAR_SCREEN_HEIGHT      25
 #define FB_LENGTH               CHAR_SCREEN_WIDTH * CHAR_SCREEN_HEIGHT
 #define TAB_WIDTH               4   // Don't start a war, kids
+#define SERIAL_OUT              0
+#define FB_OUT                  1
 
 char *fb = (char *) 0x000B8000;
+unsigned int CURSOR_POS = 0;
 
 /** serial_configure_baud_rate:
  *  Sets the speed of the data being sent. The default speed of a serial
@@ -81,6 +84,7 @@ void fb_move_cursor(unsigned short pos) {
 	outb(FB_DATA_PORT,    ((pos >> 8) & 0x00FF));
 	outb(FB_COMMAND_PORT, FB_LOW_BYTE_COMMAND);
     outb(FB_DATA_PORT,    pos & 0x00FF);
+    CURSOR_POS = pos;
 }
 
 /** fb_write_cell:
@@ -114,15 +118,13 @@ void fb_clear() {
  * write:
  * Driver to write to framebuffer. Outputs to the screen.
  *
- * @param i     Location in the framebuffer
  * @param buf   The buffer to be printed to the screen
- * @return int  Cursor position after text is printed to the screen
  */
-int fb_write(unsigned int i, char *buf) {
+void fb_write(char *buf) {
     unsigned int line_offset;
     unsigned int tab_offset;
-    while (*buf) {
-        // Handle scrolling when trying to print beyond framebuffer.
+    unsigned int i = CURSOR_POS;
+    while (*buf) { // Handle scrolling when trying to print beyond framebuffer.
         if (i > CHAR_SCREEN_HEIGHT * CHAR_SCREEN_WIDTH) { 
             unsigned int j = 0;
             while (j <= CHAR_SCREEN_HEIGHT * CHAR_SCREEN_WIDTH) {
@@ -150,7 +152,6 @@ int fb_write(unsigned int i, char *buf) {
         buf++;
         i++;
     }
-    return i;
 }
 
 /** TODO: Stub for now. Write this function.
@@ -165,9 +166,9 @@ void serial_write(char *buf) {
     a++;
 }
 
-/** TODO: Stub for now. Write this function.
+/**
  * print:
- * Akin to printf. Write either to framebuffer or serial port
+ * Write either to framebuffer or serial port
  * 
  * @param buf   The buffer to write
  * @param dest  Where to write it to
@@ -176,14 +177,15 @@ void serial_write(char *buf) {
  *                  - 1: FRAME BUFFER
  */
 void print(char *buf, unsigned short dest) {
-    // Dummy operation to avoid warning;
-    char a = *buf;
-    unsigned short b = dest;
-    a += b;
+    // It should just be this simple. Right?
+    if (dest == SERIAL_OUT) {
+        serial_write(buf);
+    } else if (dest == FB_OUT) {
+        fb_write(buf);
+    }
 } 
 
 int main(void) {
-    unsigned int cursor_pos = 0;
-    cursor_pos = fb_write(cursor_pos, "Welcome to ShantOS!\n");
+    print("Welcome to ShantOS!\n", FB_OUT);
 }
 
