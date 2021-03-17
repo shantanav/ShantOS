@@ -42,11 +42,33 @@ char *fb = (char *) 0x000B8000;
  *  @param com      The COM port to configure
  *  @param divisor  The divisor
  */
-void serial_configure_baud_rate(unsigned short com, unsigned short divisor)
-{
+void serial_configure_bitrate(unsigned short com, unsigned short divisor) {
     outb(SERIAL_LINE_COMMAND_PORT(com), SERIAL_LINE_ENABLE_DLAB);
     outb(SERIAL_DATA_PORT(com), (divisor >> 8) & 0x00FF);
     outb(SERIAL_DATA_PORT(com), divisor & 0x00FF);
+}
+
+ /** serial_configure_line:
+ *  Configures the line of the given serial port. The port is set to have a
+ *  data length of 8 bits, no parity bits, one stop bit and break control
+ *  disabled.
+ *
+ *  @param com  The serial port to configure
+ */
+void serial_configure_line(unsigned short com) {
+    outb(SERIAL_LINE_COMMAND_PORT(com), 0x03);
+}
+
+/** serial_is_transmit_fifo_empty:
+ *  Checks whether the transmit FIFO queue is empty or not for the given COM
+ *  port.
+ *
+ *  @param  com The COM port
+ *  @return 0 if the transmit FIFO queue is not empty
+ *          1 if the transmit FIFO queue is empty
+ */
+int serial_is_transmit_fifo_empty(unsigned int com) {
+    return inb(SERIAL_LINE_STATUS_PORT(com)) & 0x20;
 }
 
 /** fb_move_cursor:
@@ -90,16 +112,18 @@ void fb_clear() {
 
 /**
  * write:
- * Basic write-to-framebuffer driver. Outputs to the screen.
+ * Driver to write to framebuffer. Outputs to the screen.
  *
  * @param i     Location in the framebuffer
  * @param buf   The buffer to be printed to the screen
+ * @return int  Cursor position after text is printed to the screen
  */
-int write(unsigned int i, char *buf) {
+int fb_write(unsigned int i, char *buf) {
     unsigned int line_offset;
     unsigned int tab_offset;
     while (*buf) {
-        if (i > CHAR_SCREEN_HEIGHT * CHAR_SCREEN_WIDTH) { // Handle scrolling when trying to print beyond framebuffer.
+        // Handle scrolling when trying to print beyond framebuffer.
+        if (i > CHAR_SCREEN_HEIGHT * CHAR_SCREEN_WIDTH) { 
             unsigned int j = 0;
             while (j <= CHAR_SCREEN_HEIGHT * CHAR_SCREEN_WIDTH) {
                 fb_write_cell(j, fb[(j + CHAR_SCREEN_WIDTH) * 2], 0, 15);
@@ -108,13 +132,18 @@ int write(unsigned int i, char *buf) {
             i -= CHAR_SCREEN_WIDTH * 1;
             fb_move_cursor(i);
         }
-        if (*buf == '\n') { // Handle newline characters
+        // Handle newline characters
+        if (*buf == '\n') { 
             line_offset = CHAR_SCREEN_WIDTH - (i % CHAR_SCREEN_WIDTH) - 1;
             i += line_offset;
-        } else if (*buf == '\t') { // Handle tab characters
+        } 
+        // Handle tab characters
+        else if (*buf == '\t') { 
             tab_offset = TAB_WIDTH - ((i % CHAR_SCREEN_WIDTH) % TAB_WIDTH);
             i += tab_offset;
-        } else { // Not a special character? Print normally.
+        } 
+        // Not a special character? Put it in the framebuffer normally.
+        else { 
             fb_write_cell(i, *buf, 0, 15);
             fb_move_cursor(i + 1);
         }
@@ -124,8 +153,37 @@ int write(unsigned int i, char *buf) {
     return i;
 }
 
+/** TODO: Stub for now. Write this function.
+ * serial_write:
+ * Driver to write to the serial port. Outputs logs to `com1.out`
+ *
+ * @param buf   The buffer to write to the port
+ */
+void serial_write(char *buf) {
+    // Dummy operation to avoid warning.
+    char a = *buf;
+    a++;
+}
+
+/** TODO: Stub for now. Write this function.
+ * print:
+ * Akin to printf. Write either to framebuffer or serial port
+ * 
+ * @param buf   The buffer to write
+ * @param dest  Where to write it to
+ *                  MUST BE EITHER 0 or 1
+ *                  - 0: SERIAL PORT
+ *                  - 1: FRAME BUFFER
+ */
+void print(char *buf, unsigned short dest) {
+    // Dummy operation to avoid warning;
+    char a = *buf;
+    unsigned short b = dest;
+    a += b;
+} 
+
 int main(void) {
     unsigned int cursor_pos = 0;
-    cursor_pos = write(cursor_pos, "Welcome to ShantOS!\n");
+    cursor_pos = fb_write(cursor_pos, "Welcome to ShantOS!\n");
 }
 
