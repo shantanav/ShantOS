@@ -26,3 +26,4 @@ run: ShantOS.iso
 
 clean:
 	rm -rf *.o kernel.elf ShantOS.iso
+
