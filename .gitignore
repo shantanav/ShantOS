@@ -2,4 +2,6 @@
 *.core
 bochslog.txt
 a.out
+*.iso
+kernel.elf
 
