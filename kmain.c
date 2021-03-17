@@ -27,23 +27,38 @@
 // then the lowest 8 bits will follow
 #define SERIAL_LINE_ENABLE_DLAB 0x80
 
+// Constants for screen size - height and width...
 #define CHAR_SCREEN_WIDTH       80
 #define CHAR_SCREEN_HEIGHT      25
+//...and the length of the visible framebuffer
 #define FB_LENGTH               CHAR_SCREEN_WIDTH * CHAR_SCREEN_HEIGHT
+
 #define TAB_WIDTH               4   // Don't start a war, kids
+
+// Used by the print function as constants to tell it where to output to.
 #define SERIAL_OUT              0
 #define FB_OUT                  1
 
+// Memory address for frame buffer to print to the screen
+// Is globally available and hardcoded. This is intentional.
+// Can this become a local variable? As far as I understand it,
+// No.
 char *fb = (char *) 0x000B8000;
+
+// Global mention of cursor position for all functions that need it.
+// This is not a local variable to prevent it from being cleared when
+// fb_write is done running. This could probably be local to main, but
+// that's a change I've yet to test or make.
 unsigned int CURSOR_POS = 0;
 
-/** serial_configure_baud_rate:
- *  Sets the speed of the data being sent. The default speed of a serial
- *  port is 115200 bits/s. The argument is a divisor of that number, hence
- *  the resulting speed becomes (115200 / divisor) bits/s.
+/** 
+ * serial_configure_bitrate:
+ * Sets the speed of the data being sent. The default speed of a serial
+ * port is 115200 bits/s. The argument is a divisor of that number, hence
+ * the resulting speed becomes (115200 / divisor) bits/s.
  *
- *  @param com      The COM port to configure
- *  @param divisor  The divisor
+ * @param com      The COM port to configure
+ * @param divisor  The divisor
  */
 void serial_configure_bitrate(unsigned short com, unsigned short divisor) {
     outb(SERIAL_LINE_COMMAND_PORT(com), SERIAL_LINE_ENABLE_DLAB);
@@ -51,7 +66,8 @@ void serial_configure_bitrate(unsigned short com, unsigned short divisor) {
     outb(SERIAL_DATA_PORT(com), divisor & 0x00FF);
 }
 
- /** serial_configure_line:
+/** 
+ * serial_configure_line:
  *  Configures the line of the given serial port. The port is set to have a
  *  data length of 8 bits, no parity bits, one stop bit and break control
  *  disabled.
@@ -62,23 +78,25 @@ void serial_configure_line(unsigned short com) {
     outb(SERIAL_LINE_COMMAND_PORT(com), 0x03);
 }
 
-/** serial_is_transmit_fifo_empty:
- *  Checks whether the transmit FIFO queue is empty or not for the given COM
- *  port.
+/** 
+ * serial_is_transmit_fifo_empty:
+ * Checks whether the transmit FIFO queue is empty or not for the given COM
+ * port.
  *
- *  @param  com The COM port
- *  @return 0 if the transmit FIFO queue is not empty
- *          1 if the transmit FIFO queue is empty
+ * @param  com The COM port
+ * @return 0 if the transmit FIFO queue is not empty
+ *         1 if the transmit FIFO queue is empty
  */
 int serial_is_transmit_fifo_empty(unsigned int com) {
     return inb(SERIAL_LINE_STATUS_PORT(com)) & 0x20;
 }
 
-/** fb_move_cursor:
-*  Moves the cursor of the framebuffer to the given position
-*
-*  @param pos The new position of the cursor
-*/
+/** 
+ * fb_move_cursor:
+ * Moves the cursor of the framebuffer to the given position
+ *
+ * @param pos The new position of the cursor
+ */
 void fb_move_cursor(unsigned short pos) {
 	outb(FB_COMMAND_PORT, FB_HIGH_BYTE_COMMAND);
 	outb(FB_DATA_PORT,    ((pos >> 8) & 0x00FF));
@@ -127,7 +145,7 @@ void fb_write(char *buf) {
     while (*buf) { // Handle scrolling when trying to print beyond framebuffer.
         if (i > CHAR_SCREEN_HEIGHT * CHAR_SCREEN_WIDTH) { 
             unsigned int j = 0;
-            while (j <= CHAR_SCREEN_HEIGHT * CHAR_SCREEN_WIDTH) {
+            while (j <= FB_LENGTH) {
                 fb_write_cell(j, fb[(j + CHAR_SCREEN_WIDTH) * 2], 0, 15);
                 j++;
             }
@@ -173,8 +191,8 @@ void serial_write(char *buf) {
  * @param buf   The buffer to write
  * @param dest  Where to write it to
  *                  MUST BE EITHER 0 or 1
- *                  - 0: SERIAL PORT
- *                  - 1: FRAME BUFFER
+ *                  - 0: SERIAL PORT    #defined as SERIAL_OUT
+ *                  - 1: FRAME BUFFER   #defined as FB_OUT
  */
 void print(char *buf, unsigned short dest) {
     // It should just be this simple. Right?
@@ -185,6 +203,10 @@ void print(char *buf, unsigned short dest) {
     }
 } 
 
+/**
+ * main:
+ * Main function. Program entrypoint.
+ */
 int main(void) {
     print("Welcome to ShantOS!\n", FB_OUT);
 }
