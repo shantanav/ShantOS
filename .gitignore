@@ -4,4 +4,4 @@ bochslog.txt
 a.out
 *.iso
 kernel.elf
-
+iso/boot/kernel.elf
