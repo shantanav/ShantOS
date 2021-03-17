@@ -87,8 +87,8 @@ int write(unsigned int i, char *buf, unsigned int len) {
 
 int main(void) {
     unsigned int cursor_pos = 0;
-    cursor_pos = write(cursor_pos, "I wrote a pretty convincing text driver for this!\nIt can:\n\t1.\t\tHandle variable tabbing\n\t2.\t\tDo newlines properly\n\t3..\tHandle variable tabbing properly\n", CHAR_SCREEN_WIDTH * CHAR_SCREEN_HEIGHT);
-    cursor_pos = write(cursor_pos, "It can even handle being given multiple write statements appropriately, and works akin to C's puts function.", CHAR_SCREEN_WIDTH * CHAR_SCREEN_HEIGHT);
-    cursor_pos = write(CHAR_SCREEN_WIDTH * (CHAR_SCREEN_HEIGHT - 1), "What happens when you intentionally cause a segmentation fault on an operating system with no signal interrupts? Multiple scroll errors it seems. This really stupidly long line is designed to hopefully bugtest that a little bit.", CHAR_SCREEN_WIDTH * CHAR_SCREEN_HEIGHT);
+    cursor_pos = write(cursor_pos, "Welcome to ShantOS!\n", CHAR_SCREEN_WIDTH * CHAR_SCREEN_HEIGHT);
+    cursor_pos = write(cursor_pos, "I can't do much yet, but I exist!\n", CHAR_SCREEN_WIDTH * CHAR_SCREEN_HEIGHT);
+    cursor_pos = write(cursor_pos, "I can output text!\n", CHAR_SCREEN_WIDTH * CHAR_SCREEN_HEIGHT);
 }
 
