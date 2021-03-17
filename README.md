@@ -5,3 +5,7 @@
  - At this point, Bochs may \>\>PANIC\<\< at you. If it does, complaining about a display module or not having a GUI module, add the following line to `bochsrc.txt`: `display_library: sdl2`
  - In the Bochs instance that opens, press `c` and Enter to compile and run the instance
  - Hit enter in the GRUB menu that opens in Bochs to launch ShantOS
+## Disclaimers / Known Issues:
+ - This OS has only been tested on Ubuntu 20.10, and Manjaro 20.2.1 Your mileage may vary when using other OSes. 
+ If you manage to get this running on a distro that isn't Ubuntu or Manjaro, open a PR that edits this README
+ with instructions!
