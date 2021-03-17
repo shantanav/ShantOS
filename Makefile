@@ -25,5 +25,5 @@ run: ShantOS.iso
 	$(AS) $(ASFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o kernel.elf ShantOS.iso kernel.elf bochslog.txt
+	rm -rf *.o kernel.elf ShantOS.iso kernel.elf bochslog.txt com1.out
 

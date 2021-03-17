@@ -5,3 +5,4 @@ a.out
 *.iso
 kernel.elf
 iso/boot/kernel.elf
+com*.out

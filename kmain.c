@@ -68,14 +68,18 @@ void serial_configure_bitrate(unsigned short com, unsigned short divisor) {
 
 /** 
  * serial_configure_line:
- *  Configures the line of the given serial port. The port is set to have a
- *  data length of 8 bits, no parity bits, one stop bit and break control
- *  disabled.
+ * Configures the line of the given serial port. The port is set to have a
+ * data length of 8 bits, no parity bits, one stop bit and break control
+ * disabled.
  *
- *  @param com  The serial port to configure
+ * @param com  The serial port to configure
  */
 void serial_configure_line(unsigned short com) {
     outb(SERIAL_LINE_COMMAND_PORT(com), 0x03);
+}
+
+void serial_configure_modem(unsigned short com) {
+    outb(SERIAL_MODEM_COMMAND_PORT(com), 0x03);
 }
 
 /** 
@@ -89,6 +93,20 @@ void serial_configure_line(unsigned short com) {
  */
 int serial_is_transmit_fifo_empty(unsigned int com) {
     return inb(SERIAL_LINE_STATUS_PORT(com)) & 0x20;
+}
+
+/**
+ * serial_write:
+ * Driver to write to the serial port. Outputs logs to `com1.out`
+ *
+ * @param buf   The buffer to write to the port
+ */
+void serial_write(char *buf) {
+    while (*buf) {
+        while (!serial_is_transmit_fifo_empty(SERIAL_COM1_BASE));
+        outb(SERIAL_COM1_BASE, *buf);
+        buf++;
+    }
 }
 
 /** 
@@ -125,7 +143,7 @@ void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg) {
  */
 void fb_clear() {
     unsigned int i = 0;
-    while (i < CHAR_SCREEN_HEIGHT * CHAR_SCREEN_WIDTH) {
+    while (i < FB_LENGTH) {
         fb_write_cell(i, '\0', 0, 15);
         i++;
     }
@@ -142,8 +160,9 @@ void fb_write(char *buf) {
     unsigned int line_offset;
     unsigned int tab_offset;
     unsigned int i = CURSOR_POS;
-    while (*buf) { // Handle scrolling when trying to print beyond framebuffer.
-        if (i > CHAR_SCREEN_HEIGHT * CHAR_SCREEN_WIDTH) { 
+    while (*buf) { 
+        // Handle scrolling when trying to print beyond framebuffer.
+        if (i > FB_LENGTH) { 
             unsigned int j = 0;
             while (j <= FB_LENGTH) {
                 fb_write_cell(j, fb[(j + CHAR_SCREEN_WIDTH) * 2], 0, 15);
@@ -172,18 +191,6 @@ void fb_write(char *buf) {
     }
 }
 
-/** TODO: Stub for now. Write this function.
- * serial_write:
- * Driver to write to the serial port. Outputs logs to `com1.out`
- *
- * @param buf   The buffer to write to the port
- */
-void serial_write(char *buf) {
-    // Dummy operation to avoid warning.
-    char a = *buf;
-    a++;
-}
-
 /**
  * print:
  * Write either to framebuffer or serial port
@@ -204,10 +211,22 @@ void print(char *buf, unsigned short dest) {
 } 
 
 /**
+ * init:
+ * Initialize port information
+ */
+void init() {
+    serial_configure_bitrate(SERIAL_COM1_BASE, 2);
+    serial_configure_line(SERIAL_COM1_BASE);
+    serial_configure_modem(SERIAL_COM1_BASE);
+}
+
+/**
  * main:
  * Main function. Program entrypoint.
  */
 int main(void) {
+    init();
     print("Welcome to ShantOS!\n", FB_OUT);
+    print("[INFO] Printed welcome message\n", SERIAL_OUT);
 }
 
