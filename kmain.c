@@ -39,6 +39,11 @@
 #define SERIAL_OUT              0
 #define FB_OUT                  1
 
+// Used by the logger function for output
+#define INFO                    1
+#define DEBUG                   2
+#define ERROR                   3
+
 // Memory address for frame buffer to print to the screen
 // Is globally available and hardcoded. This is intentional.
 // Can this become a local variable? As far as I understand it,
@@ -96,17 +101,52 @@ int serial_is_transmit_fifo_empty(unsigned int com) {
 }
 
 /**
+ * init:
+ * Initialize port information
+ */
+void init() {
+    serial_configure_bitrate(SERIAL_COM1_BASE, 2);
+    serial_configure_line(SERIAL_COM1_BASE);
+    serial_configure_modem(SERIAL_COM1_BASE);
+}
+
+/**
  * serial_write:
- * Driver to write to the serial port. Outputs logs to `com1.out`
+ * Write to serial port
  *
- * @param buf   The buffer to write to the port
+ * @param buf   The buffer to write to the serial port
  */
 void serial_write(char *buf) {
     while (*buf) {
+        // Wait until transfer queue is empty
         while (!serial_is_transmit_fifo_empty(SERIAL_COM1_BASE));
+        // Write out to port
         outb(SERIAL_COM1_BASE, *buf);
         buf++;
     }
+}
+
+/**
+ * log:
+ * Driver to write to the serial port. Outputs logs to `com1.out`
+ *
+ * @param dlvl  Debug level
+ * @param buf   The string to log
+ */
+void log(unsigned int dlvl, char *buf) {
+    switch (dlvl) {
+        case DEBUG:
+            serial_write("[DEBUG] ");
+            break;
+        case INFO:
+            serial_write("[INFO] ");
+            break;
+        case ERROR:
+            serial_write("[ERROR] ");
+            break;
+    }
+    serial_write(buf);
+    serial_write("\n");
 }
 
 /** 
@@ -151,12 +191,12 @@ void fb_clear() {
 }
 
 /**
- * write:
+ * print:
  * Driver to write to framebuffer. Outputs to the screen.
  *
  * @param buf   The buffer to be printed to the screen
  */
-void fb_write(char *buf) {
+void print(char *buf) {
     unsigned int line_offset;
     unsigned int tab_offset;
     unsigned int i = CURSOR_POS;
@@ -192,41 +232,12 @@ void fb_write(char *buf) {
 }
 
 /**
- * print:
- * Write either to framebuffer or serial port
- * 
- * @param buf   The buffer to write
- * @param dest  Where to write it to
- *                  MUST BE EITHER 0 or 1
- *                  - 0: SERIAL PORT    #defined as SERIAL_OUT
- *                  - 1: FRAME BUFFER   #defined as FB_OUT
- */
-void print(char *buf, unsigned short dest) {
-    // It should just be this simple. Right?
-    if (dest == SERIAL_OUT) {
-        serial_write(buf);
-    } else if (dest == FB_OUT) {
-        fb_write(buf);
-    }
-} 
-
-/**
- * init:
- * Initialize port information
- */
-void init() {
-    serial_configure_bitrate(SERIAL_COM1_BASE, 2);
-    serial_configure_line(SERIAL_COM1_BASE);
-    serial_configure_modem(SERIAL_COM1_BASE);
-}
-
-/**
  * main:
  * Main function. Program entrypoint.
  */
 int main(void) {
     init();
-    print("Welcome to ShantOS!\n", FB_OUT);
-    print("[INFO] Printed welcome message\n", SERIAL_OUT);
+    print("Welcome to ShantOS!\n");
+    log(INFO, "Printed welcome message");
 }
 
