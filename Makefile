@@ -1,29 +1,42 @@
-OBJECTS = loader.o kmain.o
+# Variables
+SRC := src
+OBJ := exec
+LOG := log
+
+# C Stuff
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
      -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -c
-LDFLAGS = -T link.ld -melf_i386
+CSRC := $(wildcard $(SRC)/*.c)
+
+# Assembly Compiler Stuff
 AS = nasm
 ASFLAGS = -f elf
+ASSRC := $(wildcard $(SRC)/*.s)
 
-all: kernel.elf
+# Linker
+COBJ := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(CSRC))
+ASOBJ := $(patsubst $(SRC)/%.s, $(OBJ)/%.o, $(ASSRC))
+LDFLAGS = -T $(OBJ)/link.ld -melf_i386
 
-kernel.elf: $(OBJECTS)
-	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
+all: $(OBJ)/kernel.elf $(COBJ) $(ASOBJ)
 
-ShantOS.iso: kernel.elf
-	cp kernel.elf iso/boot/kernel.elf
+$(OBJ)/kernel.elf: $(COBJ) $(ASOBJ)
+	ld $(LDFLAGS) $(COBJ) $(ASOBJ) -o $(OBJ)/kernel.elf
+
+ShantOS.iso: $(OBJ)/kernel.elf
+	cp $(OBJ)/kernel.elf iso/boot/kernel.elf
 	grub-mkrescue -o ShantOS.iso iso
 
 run: ShantOS.iso
-	bochs -f bochsrc.txt -q
+	bochs -f $(OBJ)/bochsrc.txt -q
 
-%.o: %.c
-	$(CC) $(CFLAGS)  $< -o $@
+$(OBJ)/%.o: $(SRC)/%.c
+	$(CC) -I$(SRC) $(CFLAGS)  $< -o $@
 
-%.o: %.s
-	$(AS) $(ASFLAGS) $< -o $@
+$(OBJ)/%.o: $(SRC)/%.s
+	$(AS) -I$(SRC) $(ASFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o kernel.elf ShantOS.iso kernel.elf bochslog.txt com1.out
+	rm -rf $(OBJ)/*.o ShantOS.iso $(OBJ)/kernel.elf $(LOG)/bochslog.txt $(LOG)/com1.out
 
