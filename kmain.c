@@ -197,8 +197,6 @@ void fb_clear() {
  * @param buf   The buffer to be printed to the screen
  */
 void print(char *buf) {
-    unsigned int line_offset;
-    unsigned int tab_offset;
     unsigned int i = CURSOR_POS;
     while (*buf) { 
         // Handle scrolling when trying to print beyond framebuffer.
@@ -208,18 +206,16 @@ void print(char *buf) {
                 fb_write_cell(j, fb[(j + CHAR_SCREEN_WIDTH) * 2], 0, 15);
                 j++;
             }
-            i -= CHAR_SCREEN_WIDTH * 1;
+            i -= CHAR_SCREEN_WIDTH;
             fb_move_cursor(i);
         }
         // Handle newline characters
         if (*buf == '\n') { 
-            line_offset = CHAR_SCREEN_WIDTH - (i % CHAR_SCREEN_WIDTH) - 1;
-            i += line_offset;
+            i += CHAR_SCREEN_WIDTH - (i % CHAR_SCREEN_WIDTH) - 1;
         } 
         // Handle tab characters
         else if (*buf == '\t') { 
-            tab_offset = TAB_WIDTH - ((i % CHAR_SCREEN_WIDTH) % TAB_WIDTH);
-            i += tab_offset;
+            i += TAB_WIDTH - ((i % CHAR_SCREEN_WIDTH) % TAB_WIDTH);
         } 
         // Not a special character? Put it in the framebuffer normally.
         else { 
