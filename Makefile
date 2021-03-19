@@ -12,11 +12,11 @@ CSRC := $(wildcard $(SRC)/*.c)
 # Assembly Compiler Stuff
 AS = nasm
 ASFLAGS = -f elf
-ASSRC := $(wildcard $(SRC)/*.s)
+ASSRC := $(wildcard $(SRC)/asm/*.s)
 
 # Linker
 COBJ := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(CSRC))
-ASOBJ := $(patsubst $(SRC)/%.s, $(OBJ)/%.o, $(ASSRC))
+ASOBJ := $(patsubst $(SRC)/asm/%.s, $(OBJ)/%.o, $(ASSRC))
 LDFLAGS = -T $(OBJ)/link.ld -melf_i386
 
 all: $(OBJ)/kernel.elf $(COBJ) $(ASOBJ)
@@ -32,9 +32,9 @@ run: ShantOS.iso
 	bochs -f $(OBJ)/bochsrc.txt -q
 
 $(OBJ)/%.o: $(SRC)/%.c
-	$(CC) -I$(SRC) $(CFLAGS)  $< -o $@
+	$(CC) -I$(SRC)/asm $(CFLAGS)  $< -o $@
 
-$(OBJ)/%.o: $(SRC)/%.s
+$(OBJ)/%.o: $(SRC)/asm/%.s
 	$(AS) -I$(SRC) $(ASFLAGS) $< -o $@
 
 clean:
