@@ -1,7 +1,6 @@
 # Variables
 SRC := src
 OBJ := exec
-LOG := log
 
 # C Stuff
 CC = gcc
@@ -38,5 +37,5 @@ $(OBJ)/%.o: $(SRC)/asm/%.s
 	$(AS) -I$(SRC) $(ASFLAGS) $< -o $@
 
 clean:
-	rm -rf $(OBJ)/*.o ShantOS.iso $(OBJ)/kernel.elf $(LOG)/bochslog.txt $(LOG)/com1.out
+	rm -rf $(OBJ)/*.o ShantOS.iso $(OBJ)/kernel.elf $(OBJ)/bochslog.txt $(OBJ)com1.out
 
