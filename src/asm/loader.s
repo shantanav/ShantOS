@@ -12,26 +12,6 @@ align 4                         ; the code must be 4 byte aligned
     dd FLAGS                    ; the flags,
     dd CHECKSUM                 ; and the checksum
 
-global inb
-; inb - returns a byte from the given I/O port
-; stack: [esp + 4] The address of the I/O port
-;        [esp    ] The return address
-inb:
-    mov dx, [esp + 4]       ; move the address of the I/O port to the dx register
-    in  al, dx              ; read a byte from the I/O port and store it in the al register
-    ret                     ; return the read byte
-
-global outb
-; outb - send a byte to an I/O port
-; stack: [esp + 8] the data byte
-;        [esp + 4] the I/O port
-;        [esp    ] return address
-outb:
-    mov al, [esp + 8]       ; move the data to be sent into the al register
-    mov dx, [esp + 4]       ; move the address of the I/O port into the dx register
-    out dx, al              ; send the data to the I/O port
-    ret                     ; return to the calling function
-
 loader:                     ; the loader label (defined as entry point in linker script)
     mov esp, kernel_stack + KERNEL_STACK_SIZE   ; point esp to the start of the
                                                 ; stack (end of memory area)

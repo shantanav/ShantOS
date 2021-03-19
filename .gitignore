@@ -1,8 +1,8 @@
 *.o
 *.core
-bochslog.txt
+**bochslog.txt
 a.out
 *.iso
-kernel.elf
+**kernel.elf
 iso/boot/kernel.elf
-com*.out
+**com*.out
