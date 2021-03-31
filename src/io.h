@@ -13,7 +13,7 @@
  */
 extern void outb(unsigned short port, unsigned char data);
 
-/** inb:
+/**
  *  Read a byte from an I/O port.
  *
  *  @param  port The address of the I/O port

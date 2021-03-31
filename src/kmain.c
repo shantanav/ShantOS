@@ -10,6 +10,9 @@
  * Main function. Program entrypoint.
  */
 int main(void) {
+    log(INFO, "Attempting to load GDT");
+    create_tables();
+    log(INFO, "Successfully loaded GDT");
     print("Welcome to ShantOS!\n");
     log(INFO, "Printed welcome message");
 }
