@@ -6,3 +6,4 @@ a.out
 **kernel.elf
 iso/boot/kernel.elf
 **com*.out
+**.*.bak
