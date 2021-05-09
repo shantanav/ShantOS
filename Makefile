@@ -1,6 +1,7 @@
-# Variables
+# Directories
 SRC := src
 OBJ := exec
+ASM := $(SRC)/asm
 
 # C Stuff
 CC = gcc
@@ -11,11 +12,11 @@ CSRC := $(wildcard $(SRC)/*.c)
 # Assembly Compiler Stuff
 AS = nasm
 ASFLAGS = -f elf
-ASSRC := $(wildcard $(SRC)/asm/*.s)
+ASSRC := $(wildcard $(ASM)/*.s)
 
 # Linker
 COBJ := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(CSRC))
-ASOBJ := $(patsubst $(SRC)/asm/%.s, $(OBJ)/%.o, $(ASSRC))
+ASOBJ := $(patsubst $(ASM)/%.s, $(OBJ)/%.o, $(ASSRC))
 LDFLAGS = -T $(OBJ)/link.ld -melf_i386
 
 all: $(OBJ)/kernel.elf $(COBJ) $(ASOBJ)
@@ -31,11 +32,12 @@ run: ShantOS.iso
 	bochs -f $(OBJ)/bochsrc.txt -q
 
 $(OBJ)/%.o: $(SRC)/%.c
-	$(CC) -I$(SRC)/asm $(CFLAGS)  $< -o $@
+	$(CC) -I$(SRC) $(CFLAGS)  $< -o $@
 
-$(OBJ)/%.o: $(SRC)/asm/%.s
-	$(AS) -I$(SRC) $(ASFLAGS) $< -o $@
+$(OBJ)/%.o: $(ASM)/%.s
+	$(AS) -I$(ASM) $(ASFLAGS) $< -o $@
 
 clean:
-	rm -rf $(OBJ)/*.o ShantOS.iso $(OBJ)/kernel.elf $(OBJ)/bochslog.txt $(OBJ)/com1.out
+	rm -rf $(OBJ)/*.o ShantOS.iso $(OBJ)/kernel.elf \
+		$(OBJ)/bochslog.txt $(OBJ)/com1.out
 
