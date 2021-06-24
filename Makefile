@@ -28,6 +28,12 @@ ShantOS.iso: $(OBJ)/kernel.elf
 	cp $(OBJ)/kernel.elf iso/boot/kernel.elf
 	grub-mkrescue -o ShantOS.iso iso
 
+only-ShantOS: $(OBJ)/kernel.elf
+	cp $(OBJ)/kernel.elf iso/boot/kernel.elf
+	grub-mkrescue -o ShantOS.iso iso
+	rm -rf $(OBJ)/*.o $(OBJ)/kernel.elf \
+		$(OBJ)/bochslog.txt $(OBJ)/com1.out
+
 run: ShantOS.iso
 	bochs -f $(OBJ)/bochsrc.txt -q
 
