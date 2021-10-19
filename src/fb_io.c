@@ -105,5 +105,6 @@ void print(char *buf) {
         buf++;
         i++;
     }
+    CURSOR_POS = i;
 }
 

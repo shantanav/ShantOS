@@ -1,6 +1,11 @@
 #ifndef INCLUDE_DRIVER_H
 #define INCLUDE_DRIVER_H
 
+// Used by the logger function for output
+#define INFO                    1
+#define DEBUG                   2
+#define ERROR                   3
+
 /**
  * log:
  * Driver to write to the serial port. Outputs logs to `exec/com1.out`
@@ -18,4 +23,12 @@ extern void log(unsigned int dlvl, char *buf);
  */
 extern void print(char *buf);
 
+/**
+ * create_tables:
+ * Wrapper function for the lgdt instruction
+ */
+extern void create_tables();
+
+
 #endif
+

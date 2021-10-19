@@ -28,11 +28,6 @@
 // then the lowest 8 bits will follow
 #define SERIAL_LINE_ENABLE_DLAB 0x80
 
-// Used by the logger function for output
-#define INFO                    1
-#define DEBUG                   2
-#define ERROR                   3
-
 /** 
  * serial_configure_bitrate:
  * Sets the speed of the data being sent. The default speed of a serial
