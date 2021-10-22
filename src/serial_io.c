@@ -1,4 +1,4 @@
-#include "io.h"
+#include "gdt.h"
 #include "drivers.h"
 
 // The I/O ports

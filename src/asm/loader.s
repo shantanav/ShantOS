@@ -17,9 +17,7 @@ loader:                     ; the loader label (defined as entry point in linker
                                                 ; stack (end of memory area)
     extern main             ; Entrypoint for C program. Declare that main exists elsewhere...j
     call main               ; and then call the main function. C takes over from here.
-
-.loop:                      ; Once the C is done running,
-    jmp .loop               ; Loop forever. This is to stop the Bochs instance from shutting down
+    jmp $                   ; Loop forever. This is to stop the Bochs instance from shutting down
                             ; whenever the C code is done running.
 
 section .bss

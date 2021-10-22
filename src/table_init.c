@@ -1,4 +1,4 @@
-#include "io.h"
+#include "gdt.h"
 
 #define SEGMENT_DESCRIPTOR_COUNT 3
 

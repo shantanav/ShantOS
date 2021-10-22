@@ -4,9 +4,9 @@ global load_gdt
 ;           [esp    ] return address
 load_gdt:
     mov eax, [esp + 4]  ; Get the pointer to the GDT, passed as a parameter.
-    lgdt [eax]        ; Load the new GDT pointer
+    lgdt [eax]          ; Load the new GDT pointer
 
-    mov ax, 0x10      ; 0x10 is the offset in the GDT to our data segment
+    mov ax, 0x10        ; 0x10 is the offset in the GDT to our data segment
     ret
 
 global load_idt
@@ -14,6 +14,7 @@ global load_idt
 ; stack:    [esp + 4] Address to an IDT structure
 ;           [esp    ] return address
 load_idt:
-    lidt [esp + 4]              ; Load IDT table from ESP register
+    mov eax, [esp + 4]
+    lidt [eax]          ; Load IDT table from ESP register
     ret
 

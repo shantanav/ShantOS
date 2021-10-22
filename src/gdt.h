@@ -35,14 +35,13 @@ extern void outb(unsigned short port, unsigned char data);
  */
 extern unsigned char inb(unsigned short port);
 
-/**
- * load_gdt:
- * Takes the address to a gdt_t struct and loads it as the global
- * descriptor table
+/** load_gdt:
+ *  Takes the address to a gdt_t struct and loads it as the global
+ *  descriptor table
  *
- * @param gdt: Pointer to a GDT struct
+ *  @param gdt: Pointer to a GDT struct
  */
-extern void load_gdt(gdt_t * gdt);
+extern void load_gdt(gdt_t* gdt);
 
 #endif
 
